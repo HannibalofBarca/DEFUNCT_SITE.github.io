@@ -1,0 +1,336 @@
+<!DOCTYPE HTML>
+<!--
+	Story by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+<head>
+	<title>My Works</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+</head>
+<body class="is-preload" style="background-color:black">
+
+	<!-- Wrapper -->
+	<div id="wrapper" class="divided">
+
+		&nbsp;<div class="dropdown invert">
+			<button class="dropbtn fa fa-cog"></button>
+			<div class="dropdown-content">
+				<a href="index.html">Home</a>
+				<a href="About.html">About</a>
+				<a href="CV.html">CV</a>
+				<a href="Works.html">Works</a>
+				<a href="Contact.html">Contact</a>
+			</div>
+		</div>
+
+		<!-- One -->
+		<section class="invert fullscreen onload-content-fade-down" style="text-align:center">
+			<div class="content">
+				<h1>Control Systems</h1>
+			</div>
+		</section>
+
+		<!-- Spotlight 1 -->
+		<section class="spotlight style1 color1 invert image-position-center">
+			<div class="content">
+				<h2>Quarter-Car Model</h2>
+				<p>
+					An implementation for the quarter-car model was written in MATLAB.
+					<br />
+					The following values were assumed for the system.
+					<pre>
+<code>
+function [] = Assign_Constants()
+    
+    mb = 300;    % kg
+    mw = 60;     % kg
+    
+    bs = 1000;   % N/m/s
+    
+    ks = 16000;  % N/m
+    kt = 190000; % N/m
+    
+    assignin("base", "mb", mb);
+    assignin("base", "mw", mw);
+    assignin("base", "bs", bs);
+    assignin("base", "ks", ks);
+    assignin("base", "kt", kt);
+</code>
+					</pre>
+
+				</p>
+			</div>
+			<div class="image">
+				<img src="images/Control Systems Images/Control Sys diagram.jpg" alt="" />
+			</div>
+		</section>
+
+		<!-- Spotlight 2 -->
+		<section class="spotlight style1 color invert">
+			<div class="content">
+				The given code was used evaluate the state-space matrices, and upload them to workspace.
+				<pre>
+<code>
+function [] = QMR()
+   
+    mb = evalin('base', 'mb');
+    mw = evalin('base', 'mw');
+    bs = evalin('base', 'bs');
+    ks = evalin('base', 'ks');
+    kt = evalin('base', 'kt');
+
+    % State matrices
+    A = [[0 0 1 0];
+         [0 0 0 1];
+         [-ks/mb ks/mb -bs/mb bs/mb];
+         [ks/mw -(ks+kt)/mw] bs/mw -bs/mw];
+     
+    a_mat = [[-ks/mb ks/mb -bs/mb bs/mb];
+            [ks/mw -(ks+kt)/mw] bs/mw -bs/mw];
+     
+    B = [[0 0];
+         [0 0];
+         [0 1/mb];
+         [kt/mw -1/mw]];
+     
+    b_mat = [[0 1/mb];
+            [kt/mw -1/mw]];
+    
+    C = [[1 0 0 0];
+         [0 1 0 0];
+         [0 0 1 0];
+         [0 0 0 1]];
+     
+    D = [[0 0];
+         [0 0];
+         [0 0];
+         [0 0]];    
+    
+    assignin("base", "A", A);
+    assignin("base", "B", B);
+    assignin("base", "C", C);
+    assignin("base", "D", D);  
+    
+    assignin("base", "a_mat", a_mat);
+    assignin("base", "b_mat", b_mat);
+end
+</code>
+					</pre>
+			</div>
+		</section>
+
+		<!-- Spotlight 3-->
+		<section class="color1 invert">
+			<header>
+				<h2>
+					&nbsp;LQR Controller
+				</h2>
+			</header>
+
+			<div class="gallery style2 lightbox">
+				<article>
+					<a href="images/Control Systems Images/LQR Simulink.jpg" class="image">
+						<img src="images/Control Systems Images/LQR Simulink.jpg" />
+					</a>
+					<div class="caption">
+						SIMULINK model
+					</div>
+				</article>
+
+				<article>
+					<a href="images/Control Systems Images/Sprung Mass Disp.jpg" class="image">
+						<img src="images/Control Systems Images/Sprung Mass Disp.jpg" />
+					</a>
+					<div class="caption">
+						Sprung Mass Displacement
+					</div>
+				</article>
+
+				<article>
+					<a href="images/Control Systems Images/Sprung Mass Accel.jpg" class="image">
+						<img src="images/Control Systems Images/Sprung Mass Accel.jpg" />
+					</a>
+					<div class="caption">
+						Sprung Mass Acceleration
+					</div>
+				</article>
+			</div>
+
+			<div class="content">
+				<p>
+					<br />
+					&nbsp;The MATLAB <strong>lqr()</strong> function was used to calculate the close loop matrix 'K'.
+				</p>
+				<pre>
+<code>
+function [] = LQRcontroller()
+    clc
+    
+    [A,B,C,D] = QMR(300);
+    Sys = ss(A, B, C, D);
+    
+    q1 = 1;
+    q2 = 1;
+    
+    Q = [q2 0 0 0;
+         0 -q2 0 0;
+         0 0 q1 0;
+         0 0 0 0];
+    
+    R = 1;
+    
+    K = lqr(A, B, Q, R);
+    assignin("base", "K", K);
+end
+</code>
+				</pre>
+			</div>
+
+		</section>
+
+		<!--spotlight 4-->
+		<section class="color invert">
+			<div>
+				<header>
+					<h2>&nbsp;Sliding Mode Controller</h2>
+				</header>
+
+				<p>
+					&nbsp;A novel reaching law for SMC control is suggested in
+					"<a href="https://doi.org/10.1007/s12555-017-0616-y">Control Algorithms of Magnetic Suspension Systems Based on the Improved Double Exponential Reaching Law of Sliding Mode Control</a>"
+					<br />
+					&nbsp;Implementations of the algorithms given in the paper were created in MATLAB-Simulink
+				</p>
+
+				<header>
+					<h3>&nbsp;Traditional Sliding Mode Control</h3>
+				</header>
+
+				<div class="gallery style2 lightbox">
+					<article>
+						<a href="images/Control Systems Images/SMC Simulink.jpg" class="image">
+							<img src="images/Control Systems Images/SMC Simulink.jpg" />
+						</a>
+						<div class="caption">
+							SIMULINK model
+						</div>
+					</article>
+
+					<article>
+						<a href="images/Control Systems Images/SMC Sprung Mass Disp.jpg" class="image">
+							<img src="images/Control Systems Images/SMC Sprung Mass Disp.jpg" />
+						</a>
+						<div class="caption">
+							Sprung Mass Displacement
+						</div>
+					</article>
+
+					<article>
+						<a href="images/Control Systems Images/SMC Sprung Mass Accel.jpg" class="image">
+							<img src="images/Control Systems Images/SMC Sprung Mass Accel.jpg" />
+						</a>
+						<div class="caption">
+							Sprung Mass Acceleration
+						</div>
+					</article>
+				</div>
+
+				<header>
+					<br />
+					<h3>&nbsp;Power Reaching Law Sliding Mode Control</h3>
+				</header>
+
+				<div class="gallery style2 lightbox">
+					<article>
+						<a href="images/Control Systems Images/PRL SMC Simulink.jpg" class="image">
+							<img src="images/Control Systems Images/PRL SMC Simulink.jpg" />
+						</a>
+						<div class="caption">
+							SIMULINK model
+						</div>
+					</article>
+
+					<article>
+						<a href="images/Control Systems Images/PRL SMC Sprung Mass Disp.jpg" class="image">
+							<img src="images/Control Systems Images/PRL SMC Sprung Mass Disp.jpg" />
+						</a>
+						<div class="caption">
+							Sprung Mass Displacement
+						</div>
+					</article>
+
+					<article>
+						<a href="images/Control Systems Images/PRL SMC Sprung Mass Accel.jpg" class="image">
+							<img src="images/Control Systems Images/PRL SMC Sprung Mass Accel.jpg" />
+						</a>
+						<div class="caption">
+							Sprung Mass Acceleration
+						</div>
+					</article>
+				</div>
+
+				<header>
+					<br />
+					<h3>&nbsp;Improved Double Power Reaching Law Sliding Mode Control</h3>
+				</header>
+
+				<div class="gallery style2 lightbox">
+					<article>
+						<a href="images/Control Systems Images/DPRL SMC Simulink.jpg" class="image">
+							<img src="images/Control Systems Images/DPRL SMC Simulink.jpg" />
+						</a>
+						<div class="caption">
+							SIMULINK model
+						</div>
+					</article>
+
+					<article>
+						<a href="images/Control Systems Images/DPRL SMC Sprung Mass Disp.jpg" class="image">
+							<img src="images/Control Systems Images/DPRL SMC Sprung Mass Disp.jpg" />
+						</a>
+						<div class="caption">
+							Sprung Mass Displacement
+						</div>
+					</article>
+
+					<article>
+						<a href="images/Control Systems Images/DPRL SMC Sprung Mass Accel.jpg" class="image">
+							<img src="images/Control Systems Images/DPRL SMC Sprung Mass Accel.jpg" />
+						</a>
+						<div class="caption">
+							Sprung Mass Acceleration
+						</div>
+					</article>
+				</div>
+				<br />
+			</div>
+		</section>
+
+		<!-- Footer -->
+		<footer class="wrapper style1 align-left invert color1">
+			<div class="content">
+				<dl>
+					<dd class="icon fa-envelope"> f20190303@goa.bits-pilani.ac.in</dd>
+					<dd class="icon"> (+91) 94250-60524</dd>
+				</dl>
+			</div>
+		</footer>
+
+	</div>
+
+	<!-- Scripts -->
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/jquery.scrollex.min.js"></script>
+	<script src="assets/js/jquery.scrolly.min.js"></script>
+	<script src="assets/js/browser.min.js"></script>
+	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="assets/js/util.js"></script>
+	<script src="assets/js/main.js"></script>
+
+</body>
+</html>
